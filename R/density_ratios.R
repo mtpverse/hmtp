@@ -1,0 +1,63 @@
+cf_r <- function(task, learners, mtp, control, pb) {
+  out <- list()
+
+  for (fold in seq_along(task$folds)) {
+    out[[fold]] <- future::future({
+      estimate_r(get_folded_data(task$natural, task$folds, fold),
+      					 get_folded_data(task$shifted, task$folds, fold),
+      					 task$trt,
+      					 task$cens,
+      					 task$node_list$trt,
+      					 learners,
+      					 pb,
+      					 mtp,
+      					 control)
+    },
+    seed = TRUE)
+  }
+
+  trim_ratios(recombine_ratios(future::value(out), task$folds), control$.trim)
+}
+
+estimate_r <- function(natural, shifted, trt, cens, node_list, learners, pb, mtp, control) {
+	on.exit(pb())
+  densratios <- matrix(nrow = nrow(natural$valid), ncol = 1)
+
+  jt <- rep(censored(natural$train, cens)$j, 2)
+  iv <- censored(natural$valid, cens)$i
+  jv <- censored(natural$valid, cens)$j
+  fv <- followed_rule(natural$valid[[trt]], shifted$valid[[trt]], mtp)
+
+  vars <- c(node_list[[1]], cens)
+  stacked <- stack_data(natural$train, shifted$train)
+
+  fit <- run_ensemble(stacked[jt, ][["tmp_hmtp_stack_indicator"]],
+  										stacked[jt, vars],
+  										learners,
+  										"binomial",
+  										stacked[jt, ]$hmtp_id,
+  										control$.learners_trt_folds)
+
+  if (control$.return_full_fits) {
+  	fits <- fit
+  } else {
+  	fits <- extract_sl_weights(fit)
+  }
+
+  pred <- matrix(-999L, nrow = nrow(natural$valid), ncol = 1)
+  pred[jv, ] <- bound(SL_predict(fit, natural$valid[jv, vars]), .Machine$double.eps)
+
+  densratios[, 1] <- density_ratios(pred, iv, fv, mtp)
+  list(ratios = densratios, fits = fits)
+}
+
+stack_data <- function(natural, shifted) {
+	out <- rbind(natural, shifted)
+  out[["tmp_hmtp_stack_indicator"]] <- rep(c(0, 1), each = nrow(natural))
+  out
+}
+
+density_ratios <- function(pred, cens, followed, mtp) {
+  pred <- ifelse(followed & isFALSE(mtp), pmax(pred, 0.5), pred)
+  (pred * cens * followed) / (1 - pmin(pred, 0.999))
+}
