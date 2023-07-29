@@ -33,17 +33,17 @@ contrast_additive <- function(fits, ref) {
     vals = vals,
     eifs = eifs
   )
-  class(out) <- "lmtp_contrast"
+  class(out) <- "hmtp_contrast"
   return(out)
 }
 
 contrast_additive_single <- function(fit, ref) {
-  if (is.lmtp(ref)) {
+  if (is.hmtp(ref)) {
     theta <- fit$theta - ref$theta
     eif <- fit$eif - ref$eif
   }
 
-  if (isFALSE(is.lmtp(ref))) {
+  if (isFALSE(is.hmtp(ref))) {
     theta <- fit$theta - ref
     eif <- fit$eif
   }
@@ -63,7 +63,7 @@ contrast_additive_single <- function(fit, ref) {
     vals = data.frame(
       theta = theta,
       shift = fit$theta,
-      ref = ifelse(is.lmtp(ref), ref$theta, ref),
+      ref = ifelse(is.hmtp(ref), ref$theta, ref),
       std.error = std.error,
       conf.low = conf.low,
       conf.high = conf.high,
