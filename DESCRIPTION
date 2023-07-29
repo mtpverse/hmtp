@@ -1,4 +1,4 @@
-Package: htmp
+Package: hmtp
 Type: Package
 Title: Targeted Minimum-Loss Based Estimation for Hurdle Models
 Version: 0.1.0
