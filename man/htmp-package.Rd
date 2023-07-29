@@ -4,8 +4,25 @@
 \name{htmp-package}
 \alias{htmp}
 \alias{htmp-package}
-\title{htmp: What the Package Does (Title Case)}
+\title{htmp: Targeted Minimum-Loss Based Estimation for Hurdle Models}
 \description{
-More about what it does (maybe more than one line) Use four spaces when indenting paragraphs within the Description.
+
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/mtpverse/hmtp}
+  \item Report bugs at \url{https://github.com/mtpverse/hmtp/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Nicholas Williams \email{ntwilliams.personal@gmail.com} (\href{https://orcid.org/0000-0002-1378-4831}{ORCID}) [copyright holder]
+
+Authors:
+\itemize{
+  \item Iván Díaz \email{ild2005@med.cornell.edu} (\href{https://orcid.org/0000-0001-9056-2047}{ORCID}) [copyright holder]
+}
+
 }
 \keyword{internal}
