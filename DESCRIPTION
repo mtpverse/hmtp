@@ -29,3 +29,5 @@ Imports:
     R6,
     SuperLearner
 License: GPL (>= 3)
+Depends: 
+    R (>= 2.10)

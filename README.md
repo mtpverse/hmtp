@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![CRAN
-status](https://www.r-pkg.org/badges/version/lmtp)](https://CRAN.R-project.org/package=hmtp)
+status](https://www.r-pkg.org/badges/version/hmtp)](https://CRAN.R-project.org/package=hmtp)
 [![License: GPL
 v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- badges: end -->
@@ -24,6 +24,22 @@ The stable, development version can be installed from GitHub with:
 
 ``` r
 devtools::install_github("mtpverse/hmtp")
+```
+
+## Example
+
+``` r
+library(hmtp)
+
+hmtp_tmle(hmtp_simdata, "trt", "y", paste0("x.", 1:3), shift = static_binary_on)
+                                                                                                       
+#> HMTP Estimator: TMLE
+#>    Trt. Policy: (static_binary_on)
+#> 
+#> Population intervention estimate
+#>       Estimate: 0.6104
+#>     Std. error: 0.0241
+#>         95% CI: (0.5631, 0.6577)
 ```
 
 ### Features
@@ -45,12 +61,6 @@ devtools::install_github("mtpverse/hmtp")
 | Clustered data                  |   ✓    |
 | Parallel processing             |   ✓    |
 | Progress bars                   |   ✓    |
-
-## Example
-
-``` r
-library(hmtp)
-```
 
 ## Citation
 
