@@ -27,9 +27,7 @@
 #' @param upper_bound \[\code{numeric(1)}\]\cr
 #' @param learners_zero \[\code{character}\]\cr
 #' @param learners_positive \[\code{character}\]\cr
-#' @param learners_trt \[\code{character}\]\cr A vector of \code{SuperLearner} algorithms for estimation
-#'  of the exposure mechanism. Default is \code{"SL.glm"}, a main effects GLM.
-#'  \bold{Only include candidate learners capable of binary classification}.
+#' @param learners_trt \[\code{character}\]\cr \bold{Only include candidate learners capable of binary classification}.
 #' @param folds \[\code{integer(1)}\]\cr
 #'  The number of folds to be used for cross-fitting.
 #' @param weights \[\code{numeric(nrow(data))}\]\cr
@@ -40,12 +38,7 @@
 #'
 #' @details
 #' ## Should \code{mtp = TRUE}?
-#' A modified treatment policy (MTP) is an intervention that depends
-#' on the natural value of the exposure (the value that the treatment would have taken under no intervention).
-#' This differs from other causal effects,
-#' such as the average treatment effect (ATE), where an exposure would be increased (or decreased) deterministically.
-#' \bold{If your intervention of interest adds, subtracts, or multiplies the observed treatment values
-#' by some amount, use \code{mtp = TRUE}}.
+#' A modified treatment policy (MTP) is an intervention that depends on the natural value of the exposure (the value that the treatment would have taken under no intervention). This differs from other causal effects, such as the average treatment effect (ATE), where an exposure would be increased (or decreased) deterministically. \bold{If your intervention of interest adds, subtracts, or multiplies the observed treatment values by some amount, use \code{mtp = TRUE}}.
 #'
 #' @return A list of class \code{hmtp} containing the following components:
 #'

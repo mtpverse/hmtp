@@ -4,7 +4,7 @@
 \name{hmtp-package}
 \alias{hmtp}
 \alias{hmtp-package}
-\title{hmtp: Targeted Minimum-Loss Based Estimation for Hurdle Models}
+\title{hmtp: Targeted Minimum-Loss Based Estimation for Semi-continuous Outcomes}
 \description{
 
 }
