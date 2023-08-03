@@ -2,7 +2,7 @@ eif <- function(y, r, qn, qs, mn, ms) {
 	r * (y - qn*mn) + qs*ms
 }
 
-theta <- function(y, r, q, m, folds, id, weights, shift, fits_r, fits_q, fits_m) {
+theta <- function(y, r, q, m, folds, id, weights, shift, fits_q, fits_m) {
   inflnce <- eif(y, r, q$natural, q$shifted, m$natural, m$shifted)
 
   theta <- {
@@ -30,7 +30,6 @@ theta <- function(y, r, q, m, folds, id, weights, shift, fits_r, fits_q, fits_m)
     density_ratios = r,
     zero_reg = q$shifted,
     positive_reg = m$shifted,
-    fits_r = fits_r,
     fits_q = fits_q,
     fits_m = fits_m
   )

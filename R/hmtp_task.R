@@ -14,7 +14,7 @@ hmtp_task <- R6::R6Class(
     weights = NULL,
     log = NULL,
     initialize = function(data, trt, outcome, baseline, cens, shift, shifted,
-    											id, V = 10, weights = NULL, log, upper_bound = NULL) {
+    											id, folds, weights = NULL, log, upper_bound = NULL) {
       self$n <- nrow(data)
       self$trt <- trt
       self$cens <- cens
@@ -22,7 +22,7 @@ hmtp_task <- R6::R6Class(
       self$bounds <- y_bounds(data[[outcome]], upper_bound)
       data$hmtp_id <- create_ids(data, id)
       self$id <- data$hmtp_id
-      self$folds <- setup_cv(data, data$hmtp_id, V)
+      self$folds <- folds
       self$log <- log
 
       shifted <- {

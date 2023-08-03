@@ -19,17 +19,13 @@
 #' @param shifted \[\code{data.frame}\]\cr
 #'  An optional data frame, the same as in \code{data}, but modified according
 #'  to the treatment policy of interest. If specified, \code{shift} is ignored.
-#' @param mtp \[\code{logical(1)}\]\cr
-#'  Is the intervention of interest a modified treatment policy?
-#'  Default is \code{FALSE}. If treatment variables are continuous this should be \code{TRUE}.
+#' @param density_ratios
 #' @param id \[\code{character(1)}\]\cr
 #'  An optional column name containing cluster level identifiers.
 #' @param upper_bound \[\code{numeric(1)}\]\cr
 #' @param learners_zero \[\code{character}\]\cr
 #' @param learners_positive \[\code{character}\]\cr
-#' @param learners_trt \[\code{character}\]\cr \bold{Only include candidate learners capable of binary classification}.
 #' @param folds \[\code{integer(1)}\]\cr
-#'  The number of folds to be used for cross-fitting.
 #' @param weights \[\code{numeric(nrow(data))}\]\cr
 #'  An optional vector containing sampling weights.
 #' @param log
@@ -46,10 +42,9 @@
 #' @export
 hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
                       cens = NULL, shift = NULL, shifted = NULL,
-                      mtp = FALSE, id = NULL, upper_bound = NULL,
-											learners_trt = "SL.glm",
-											learners_zero = "SL.glm",
-                      learners_positive = "SL.glm",
+                      density_ratios, id = NULL, upper_bound = NULL,
+											learners_zero = "glm",
+                      learners_positive = "glm",
                       folds = 10, weights = NULL, log = TRUE,
 											control = hmtp_control(), ...) {
   assertNotDataTable(data)
@@ -65,7 +60,7 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   assertShiftedData(shifted, data, c(outcome, baseline, id), cens)
   checkmate::assertNumeric(upper_bound, len = 1, finite = TRUE, any.missing = FALSE, null.ok = TRUE)
   checkmate::assertNumeric(weights, len = nrow(data), finite = TRUE, any.missing = FALSE, null.ok = TRUE)
-  checkmate::assertNumber(folds, lower = 1, upper = nrow(data) - 1)
+  checkmate::assertList(folds)
 
   task <- hmtp_task$new(data = data,
   											trt = trt,
@@ -75,27 +70,25 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   											shift = shift,
   											shifted = shifted,
   											id = id,
-  											V = folds,
+  											folds = folds,
   											weights = weights,
   											log = log,
   											upper_bound = upper_bound)
 
-  pb <- progressr::progressor(folds*3)
+  pb <- progressr::progressor(length(folds)*2)
 
-  r <- cf_r(task, learners_trt, mtp, control, pb)
   d <- cf_delta(task, learners_zero, control, pb)
   m <- cf_m(task, learners_positive, control, pb)
-  eps <- cf_tmle(task, r$ratios, d, m)
+  eps <- cf_tmle(task, density_ratios, d, m)
 
   theta(y = data[[outcome]],
-  			r = r$ratios,
+  			r = density_ratios,
   			q = list(natural = eps$qn, shifted = eps$qs),
   			m = list(natural = eps$mn, shifted = eps$ms),
   			folds = task$folds,
   			id = task$id,
   			weights = task$weights,
   			shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
-  			fits_r = r$fits,
   			fits_q = d$fits,
   			fits_m = m$fits)
 }

@@ -12,10 +12,9 @@ hmtp_tmle(
   cens = NULL,
   shift = NULL,
   shifted = NULL,
-  mtp = FALSE,
+  density_ratios,
   id = NULL,
   upper_bound = NULL,
-  learners_trt = "SL.glm",
   learners_zero = "SL.glm",
   learners_positive = "SL.glm",
   folds = 10,
@@ -52,23 +51,16 @@ See examples for how to specify shift functions for continuous, binary, and cate
 An optional data frame, the same as in \code{data}, but modified according
 to the treatment policy of interest. If specified, \code{shift} is ignored.}
 
-\item{mtp}{\[\code{logical(1)}\]\cr
-Is the intervention of interest a modified treatment policy?
-Default is \code{FALSE}. If treatment variables are continuous this should be \code{TRUE}.}
-
 \item{id}{\[\code{character(1)}\]\cr
 An optional column name containing cluster level identifiers.}
 
 \item{upper_bound}{\[\code{numeric(1)}\]\cr}
 
-\item{learners_trt}{\[\code{character}\]\cr \bold{Only include candidate learners capable of binary classification}.}
-
 \item{learners_zero}{\[\code{character}\]\cr}
 
 \item{learners_positive}{\[\code{character}\]\cr}
 
-\item{folds}{\[\code{integer(1)}\]\cr
-The number of folds to be used for cross-fitting.}
+\item{folds}{\[\code{integer(1)}\]\cr}
 
 \item{weights}{\[\code{numeric(nrow(data))}\]\cr
 An optional vector containing sampling weights.}

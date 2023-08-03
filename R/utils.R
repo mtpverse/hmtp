@@ -1,3 +1,13 @@
+#' Create Folds for Cross-fitting
+#'
+#' @param data
+#' @param id
+#' @param V
+#'
+#' @return
+#' @export
+#'
+#' @examples
 setup_cv <- function(data, id, V = 10) {
   out <- origami::make_folds(data, cluster_ids = id, V = V)
   if (V > 1) {
