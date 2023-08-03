@@ -33,16 +33,16 @@ estimate_m <- function(natural, shifted, node_list, cens, learners, log, pb, con
 
 	vars <- node_list[[1]]
 	if (log) {
-		ystar <- log(natural$train[i & delta, ]$tmp_hmtp_ystar)
-	} else {
-		ystar <- natural$train[i & delta, ]$tmp_hmtp_ystar
+		natural$train[i & delta, "tmp_hmtp_ystar"] <-
+			log(natural$train[i & delta, ]$tmp_hmtp_ystar)
 	}
 
-	fit <- run_ensemble(ystar,
-											natural$train[i & delta, vars],
+	fit <- run_ensemble(natural$train[i & delta, c("hmtp_id", vars, "tmp_hmtp_ystar")],
+											"tmp_hmtp_ystar",
 											learners,
 											"continuous",
-											id = natural$train[i & delta, ]$hmtp_id,
+											"hmtp_id",
+											control$.metalearner_positive,
 											control$.learners_positive_folds)
 
 	if (control$.return_full_fits) {
@@ -60,8 +60,8 @@ estimate_m <- function(natural, shifted, node_list, cens, learners, log, pb, con
 
 	.f <- retransform(log)
 
-	mn[jv, 1] <- bound(.f(SL_predict(fit, natural$valid[jv, vars])), 1e-05)
-	ms[jv, 1] <- bound(.f(SL_predict(fit, shifted$valid[jv, vars])), 1e-05)
+	mn[jv, 1] <- bound(.f(predict(fit, natural$valid[jv, c("hmtp_id", vars)])), 1e-05)
+	ms[jv, 1] <- bound(.f(predict(fit, shifted$valid[jv, c("hmtp_id", vars)])), 1e-05)
 
 	list(mn = mn,
 			 ms = ms,

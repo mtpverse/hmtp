@@ -30,4 +30,5 @@ Imports:
     SuperLearner
 License: GPL (>= 3)
 Depends: 
+    mlr3superlearner,
     R (>= 2.10)

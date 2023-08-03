@@ -31,11 +31,12 @@ estimate_r <- function(natural, shifted, trt, cens, node_list, learners, pb, mtp
   vars <- c(node_list[[1]], cens)
   stacked <- stack_data(natural$train, shifted$train)
 
-  fit <- run_ensemble(stacked[jt, ][["tmp_hmtp_stack_indicator"]],
-  										stacked[jt, vars],
+  fit <- run_ensemble(stacked[jt, c("hmtp_id", vars, "tmp_hmtp_stack_indicator")],
+  										"tmp_hmtp_stack_indicator",
   										learners,
   										"binomial",
-  										stacked[jt, ]$hmtp_id,
+  										"hmtp_id",
+  										control$.metalearner_trt,
   										control$.learners_trt_folds)
 
   if (control$.return_full_fits) {
@@ -45,7 +46,7 @@ estimate_r <- function(natural, shifted, trt, cens, node_list, learners, pb, mtp
   }
 
   pred <- matrix(-999L, nrow = nrow(natural$valid), ncol = 1)
-  pred[jv, ] <- bound(SL_predict(fit, natural$valid[jv, vars]), .Machine$double.eps)
+  pred[jv, ] <- bound(predict(fit, natural$valid[jv, c("hmtp_id", vars)]), .Machine$double.eps)
 
   densratios[, 1] <- density_ratios(pred, iv, fv, mtp)
   list(ratios = densratios, fits = fits)
