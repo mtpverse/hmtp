@@ -32,7 +32,7 @@ hmtp_task <- R6::R6Class(
           shift_data(data, trt, cens, shift)
         else {
           tmp <- shifted
-          tmp$lmtp_id <- data$lmtp_id
+          tmp$hmtp_id <- data$hmtp_id
           tmp
         }
       }

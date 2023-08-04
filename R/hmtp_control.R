@@ -1,3 +1,11 @@
+#' Title
+#'
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
 hmtp_control <- function(...) {
 	change <- list(...)
 	control <- list(.learners_delta_folds = 10,
