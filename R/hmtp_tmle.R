@@ -47,9 +47,9 @@
 hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
                       cens = NULL, shift = NULL, shifted = NULL,
                       mtp = FALSE, id = NULL, upper_bound = NULL,
-											learners_trt = "SL.glm",
-											learners_zero = "SL.glm",
-                      learners_positive = "SL.glm",
+											learners_trt = "glm",
+											learners_zero = "glm",
+                      learners_positive = "glm",
                       folds = 10, weights = NULL, log = TRUE,
 											control = hmtp_control(), ...) {
   assertNotDataTable(data)
