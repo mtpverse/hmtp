@@ -109,7 +109,8 @@ sw <- function(x) {
 
 extract_sl_weights <- function(fit) {
 	if (inherits(fit, "mlr3superlearner")) {
-		return(cbind(Risk = fit$risk))
+		return(cbind(Risk = fit$risk,
+								 Coefficients = fit$weights))
 	}
 	fit$coef
 }

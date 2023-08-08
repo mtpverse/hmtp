@@ -12,10 +12,7 @@ hmtp_control <- function(...) {
 									.learners_delta_folds = 10,
 									.learners_positive_folds = 10,
 									.trim = 0.99,
-									.return_full_fits = FALSE,
-									.metalearner_trt = "glm",
-									.metalearner_zero = "glm",
-									.metalearner_positive = "glm")
+									.return_full_fits = FALSE)
 	if (length(change) == 0) return(control)
 
 	for (arg in names(change)) {
