@@ -42,7 +42,6 @@ estimate_m <- function(natural, shifted, node_list, cens, learners, log, pb, con
 											learners,
 											"continuous",
 											"hmtp_id",
-											control$.metalearner_positive,
 											control$.learners_positive_folds)
 
 	if (control$.return_full_fits) {

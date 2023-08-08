@@ -36,7 +36,6 @@ estimate_r <- function(natural, shifted, trt, cens, node_list, learners, pb, mtp
   										learners,
   										"binomial",
   										"hmtp_id",
-  										control$.metalearner_trt,
   										control$.learners_trt_folds)
 
   if (control$.return_full_fits) {

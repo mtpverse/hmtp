@@ -36,7 +36,6 @@ estimate_delta <- function(natural, shifted, node_list, cens, learners, pb, cont
 											learners,
 											"binomial",
 											"hmtp_id",
-											control$.metalearner_zero,
 											control$.learners_delta_folds)
 
 	if (control$.return_full_fits) {
