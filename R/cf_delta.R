@@ -31,11 +31,11 @@ estimate_delta <- function(natural, shifted, node_list, cens, learners, pb, cont
 
 	vars <- node_list[[1]]
 
-	fit <- run_ensemble(natural$train[i, ]$tmp_hmtp_delta,
-											natural$train[i, vars],
+	fit <- run_ensemble(natural$train[i, c("hmtp_id", vars, "tmp_hmtp_delta")],
+											"tmp_hmtp_delta",
 											learners,
 											"binomial",
-											id = natural$train[i, ]$hmtp_id,
+											"hmtp_id",
 											control$.learners_delta_folds)
 
 	if (control$.return_full_fits) {
@@ -44,8 +44,8 @@ estimate_delta <- function(natural, shifted, node_list, cens, learners, pb, cont
 		fits <- extract_sl_weights(fit)
 	}
 
-	dn[jv, 1] <- bound(SL_predict(fit, natural$valid[jv, vars]), 1e-05)
-	ds[jv, 1] <- bound(SL_predict(fit, shifted$valid[jv, vars]), 1e-05)
+	dn[jv, 1] <- bound(predict(fit, natural$valid[jv, c("hmtp_id", vars)]), 1e-05)
+	ds[jv, 1] <- bound(predict(fit, shifted$valid[jv, c("hmtp_id", vars)]), 1e-05)
 
 	list(dn = dn,
 			 ds = ds,

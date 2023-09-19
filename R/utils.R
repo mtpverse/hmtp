@@ -108,7 +108,11 @@ sw <- function(x) {
 }
 
 extract_sl_weights <- function(fit) {
-  fit$coef
+	if (inherits(fit, "mlr3superlearner")) {
+		return(cbind(Risk = fit$risk,
+								 Coefficients = fit$weights))
+	}
+	fit$coef
 }
 
 create_ids <- function(data, id) {

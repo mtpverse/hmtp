@@ -1,6 +1,6 @@
 Package: hmtp
 Type: Package
-Title: Targeted Minimum-Loss Based Estimation for Hurdle Models
+Title: Targeted Minimum-Loss Based Estimation for Semi-continuous Outcomes
 Version: 0.1.0
 Authors@R: 
     c(person(given = "Nicholas",
@@ -26,8 +26,10 @@ Imports:
     future,
     generics,
     progressr,
-    R6,
-    SuperLearner
+    R6
 License: GPL (>= 3)
 Depends: 
+    mlr3superlearner (>= 0.1.0),
     R (>= 2.10)
+Remotes:  
+    nt-williams/mlr3superlearner

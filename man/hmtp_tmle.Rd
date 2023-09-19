@@ -15,9 +15,9 @@ hmtp_tmle(
   mtp = FALSE,
   id = NULL,
   upper_bound = NULL,
-  learners_trt = "SL.glm",
-  learners_zero = "SL.glm",
-  learners_positive = "SL.glm",
+  learners_trt = "glm",
+  learners_zero = "glm",
+  learners_positive = "glm",
   folds = 10,
   weights = NULL,
   log = TRUE,
@@ -61,9 +61,7 @@ An optional column name containing cluster level identifiers.}
 
 \item{upper_bound}{\[\code{numeric(1)}\]\cr}
 
-\item{learners_trt}{\[\code{character}\]\cr A vector of \code{SuperLearner} algorithms for estimation
-of the exposure mechanism. Default is \code{"SL.glm"}, a main effects GLM.
-\bold{Only include candidate learners capable of binary classification}.}
+\item{learners_trt}{\[\code{character}\]\cr \bold{Only include candidate learners capable of binary classification}.}
 
 \item{learners_zero}{\[\code{character}\]\cr}
 
@@ -85,10 +83,5 @@ HMTP Targeted Maximum Likelihood Estimator
 }
 \details{
 ## Should \code{mtp = TRUE}?
-A modified treatment policy (MTP) is an intervention that depends
-on the natural value of the exposure (the value that the treatment would have taken under no intervention).
-This differs from other causal effects,
-such as the average treatment effect (ATE), where an exposure would be increased (or decreased) deterministically.
-\bold{If your intervention of interest adds, subtracts, or multiplies the observed treatment values
-by some amount, use \code{mtp = TRUE}}.
+A modified treatment policy (MTP) is an intervention that depends on the natural value of the exposure (the value that the treatment would have taken under no intervention). This differs from other causal effects, such as the average treatment effect (ATE), where an exposure would be increased (or decreased) deterministically. \bold{If your intervention of interest adds, subtracts, or multiplies the observed treatment values by some amount, use \code{mtp = TRUE}}.
 }
