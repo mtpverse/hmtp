@@ -40,6 +40,9 @@ hmtp_tmle(hmtp_simdata, "trt", "y", paste0("x.", 1:3), shift = static_binary_on)
 #>       Estimate: 0.6104
 #>     Std. error: 0.0241
 #>         95% CI: (0.5631, 0.6577)
+#>         
+#> Warning message:
+#> Cannot perform stratified CV with `group`. Performing blocked CV.
 ```
 
 ### Features

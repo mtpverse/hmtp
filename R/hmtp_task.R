@@ -21,7 +21,7 @@ hmtp_task <- R6::R6Class(
       self$node_list <- create_node_list(trt, baseline)
       self$bounds <- y_bounds(data[[outcome]], upper_bound)
       data$hmtp_id <- create_ids(data, id)
-      self$id <- data$hmtp_id
+      self$id <- id
       self$folds <- setup_cv(data, data$hmtp_id, V)
       self$log <- log
 

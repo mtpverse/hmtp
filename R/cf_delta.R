@@ -7,6 +7,7 @@ cf_delta <- function(task, learners, control, pb) {
 										 get_folded_data(task$shifted, task$folds, fold),
 										 task$node_list$outcome,
 										 task$cens,
+										 task$id,
 										 learners,
 										 pb,
 										 control)
@@ -21,7 +22,7 @@ cf_delta <- function(task, learners, control, pb) {
 			 fits = lapply(out, function(x) x[["fits"]]))
 }
 
-estimate_delta <- function(natural, shifted, node_list, cens, learners, pb, control) {
+estimate_delta <- function(natural, shifted, node_list, cens, id, learners, pb, control) {
 	on.exit(pb())
 	dn <- ds <- matrix(nrow = nrow(natural$valid), ncol = 1)
 
@@ -31,11 +32,11 @@ estimate_delta <- function(natural, shifted, node_list, cens, learners, pb, cont
 
 	vars <- node_list[[1]]
 
-	fit <- run_ensemble(natural$train[i, c("hmtp_id", vars, "tmp_hmtp_delta")],
+	fit <- run_ensemble(natural$train[i, c(id, vars, "tmp_hmtp_delta")],
 											"tmp_hmtp_delta",
 											learners,
 											"binomial",
-											"hmtp_id",
+											id,
 											control$.learners_delta_folds)
 
 	if (control$.return_full_fits) {
@@ -44,8 +45,8 @@ estimate_delta <- function(natural, shifted, node_list, cens, learners, pb, cont
 		fits <- extract_sl_weights(fit)
 	}
 
-	dn[jv, 1] <- bound(predict(fit, natural$valid[jv, c("hmtp_id", vars)]), 1e-05)
-	ds[jv, 1] <- bound(predict(fit, shifted$valid[jv, c("hmtp_id", vars)]), 1e-05)
+	dn[jv, 1] <- bound(predict(fit, natural$valid[jv, c(id, vars)]), 1e-05)
+	ds[jv, 1] <- bound(predict(fit, shifted$valid[jv, c(id, vars)]), 1e-05)
 
 	list(dn = dn,
 			 ds = ds,
