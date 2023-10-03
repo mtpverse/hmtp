@@ -5,38 +5,42 @@ cf_tmle <- function(task, ratios, delta, positive, control) {
                    nrow = nrow(ratios),
                    ncol = ncol(ratios))
 
-  for (fold in seq_along(task$folds)) {
-    out[[fold]] <- future::future({
-      estimate_tmle(
-        get_folded_data(task$natural, task$folds, fold),
-        get_folded_data(ratios, task$folds, fold)$train,
-        lapply(delta[c("dn", "ds")],
-        			 function(x) get_folded_data(x, task$folds, fold)),
-        lapply(positive[c("mn", "ms")],
-        			 function(x) get_folded_data(x, task$folds, fold)),
-        task$weights[task$folds[[fold]]$training_set],
-        task$cens,
-        task$bounds
-      )
-    },
-    seed = TRUE)
-  }
+  boots <- replicate(1000, sample(1:nrow(task$natural), nrow(task$natural), replace = TRUE), simplify = FALSE)
 
-  out <- future::value(out)
+  Qnb <- lapply(boots, function(i) {
+  	estimate_tmle(task$natural[i, ],
+  								ratios[i, , drop = FALSE],
+  								lapply(delta[c("dn", "ds")], function(x) x[i, , drop = FALSE]),
+  								lapply(positive[c("mn", "ms")], function(x) x[i, , drop = FALSE]),
+  								task$weights[i, , drop = FALSE],
+  								task$cens,
+  								task$bounds)
+  })
 
-  list(ms = recombine_outcome(out, "ms", task$folds),
-  		 qs = recombine_outcome(out, "qs", task$folds),
-  		 mn = recombine_outcome(out, "mn", task$folds),
-  		 qn = recombine_outcome(out, "qn", task$folds))
+  psi <- estimate_tmle(task$natural,
+  										 ratios,
+  										 delta[c("dn", "ds")],
+  										 positive[c("mn", "ms")],
+  										 task$weights,
+  										 task$cens,
+  										 task$bounds)
+
+  booted <- sapply(Qnb, function(x) {
+  	if (is.null(task$weights))
+  		mean(x$qs*x$ms)
+  	else
+  		weighted.mean(x$qs*x$ms, weights)
+  })
+
+  list(psi = psi, booted = booted)
 }
 
 estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, bounds) {
-	i  <- censored(natural$train, cens)$i
-	jt <- censored(natural$train, cens)$j
-	jv <- censored(natural$valid, cens)$j
-	d <- natural$train$tmp_hmtp_delta == 1
+	i  <- censored(natural, cens)$i
+	j <- censored(natural, cens)$j
+	d <- natural$tmp_hmtp_delta == 1
 
-	msv_eps <- dsv_eps <- dnv_eps <- mnv_eps <- matrix(nrow = nrow(natural$valid), ncol = 1)
+	ms_eps <- ds_eps <- dn_eps <- mn_eps <- matrix(nrow = nrow(natural), ncol = 1)
 
 	wts <- {
 		if (is.null(weights))
@@ -47,27 +51,32 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, bound
 
 	fit1 <- sw(
 		glm(
-			natural$train[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn$train[i & d, 1])),
-			weights = wts[d],
-			family = "binomial"
+			natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
+			family = "binomial",
+			weights = wts[d]
 		)
 	)
 
-	mnt_eps <- rescale_y(plogis(qlogis(positive$mn$train[jt, 1]) + coef(fit1)), bounds)
-	msv_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms$valid[jv, 1]) + coef(fit1)), bounds)
-	mnv_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn$valid[jv, 1]) + coef(fit1)), bounds)
+	eps1 <- coef(fit1)
+
+	ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
+	mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
+
+	wts2 <- wts*mn_eps[, 1]
 
 	fit2 <- sw(
-		glm(natural$train[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn$train[i, 1])),
-				weights = (wts*mnt_eps),
-				family = "binomial")
+		glm(natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])),
+				family = "binomial",
+				weights = wts2)
 	)
 
-	dsv_eps[, 1] <- plogis(qlogis(delta$ds$valid[jv, 1]) + coef(fit2))
-	dnv_eps[, 1] <- plogis(qlogis(delta$dn$valid[jv, 1]) + coef(fit2))
+	eps2 <- coef(fit2)
 
-	list(qs = dsv_eps,
-			 qn = dnv_eps,
-			 ms = msv_eps,
-			 mn = mnv_eps)
+	ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1])
+	dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1])
+
+	list(qs = ds_eps,
+			 qn = dn_eps,
+			 ms = ms_eps,
+			 mn = mn_eps)
 }
