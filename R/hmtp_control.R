@@ -14,10 +14,7 @@ hmtp_control <- function(...) {
 									.return_full_fits = FALSE)
 
 	if (length(change) == 0) return(control)
-
-	for (arg in names(change)) {
-		control[[arg]] <- change[[arg]]
-	}
-
+	change <- change[names(change) %in% names(control)]
+	control[names(change)] <- change
 	control
 }
