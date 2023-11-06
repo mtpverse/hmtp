@@ -1,11 +1,17 @@
 cf_tmle <- function(task, ratios, delta, positive, control) {
-  out <- list()
+  psi <- estimate_tmle(task$natural,
+  										 ratios,
+  										 delta[c("dn", "ds")],
+  										 positive[c("mn", "ms")],
+  										 task$weights,
+  										 task$cens,
+  										 task$bounds)
 
-  ratios <- matrix(t(apply(ratios, 1, cumprod)),
-                   nrow = nrow(ratios),
-                   ncol = ncol(ratios))
+  if (!is.null(control$.boot_seed)) set.seed(control$.boot_seed)
 
-  boots <- replicate(1000, sample(1:nrow(task$natural), nrow(task$natural), replace = TRUE), simplify = FALSE)
+  boots <- replicate(control$.B,
+  									 sample(1:nrow(task$natural), nrow(task$natural), replace = TRUE),
+  									 simplify = FALSE)
 
   Qnb <- lapply(boots, function(i) {
   	estimate_tmle(task$natural[i, ],
@@ -16,14 +22,6 @@ cf_tmle <- function(task, ratios, delta, positive, control) {
   								task$cens,
   								task$bounds)
   })
-
-  psi <- estimate_tmle(task$natural,
-  										 ratios,
-  										 delta[c("dn", "ds")],
-  										 positive[c("mn", "ms")],
-  										 task$weights,
-  										 task$cens,
-  										 task$bounds)
 
   booted <- sapply(Qnb, function(x) {
   	if (is.null(task$weights))

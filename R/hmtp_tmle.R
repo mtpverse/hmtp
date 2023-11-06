@@ -85,7 +85,7 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   r <- cf_r(task, learners_trt, mtp, control, pb)
   d <- cf_delta(task, learners_zero, control, pb)
   m <- cf_m(task, learners_positive, control, pb)
-  eps <- cf_tmle(task, r$ratios, d, m)
+  eps <- cf_tmle(task, r$ratios, d, m, control)
 
   theta(y = data[[outcome]],
   			r = r$ratios,

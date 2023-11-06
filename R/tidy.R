@@ -4,7 +4,7 @@ generics::tidy
 
 #' Tidy a(n) hmtp object
 #'
-#' @param x A `hmtp` object produced by a call to [lmtp::hmtp_tmle()].
+#' @param x A `hmtp` object produced by a call to [hmtp::hmtp_tmle()].
 #' @param ... Unused, included for generic consistency only.
 #'
 #' @examples

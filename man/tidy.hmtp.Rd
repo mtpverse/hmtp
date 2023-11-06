@@ -7,7 +7,7 @@
 \method{tidy}{hmtp}(x, ...)
 }
 \arguments{
-\item{x}{A `hmtp` object produced by a call to [lmtp::hmtp_tmle()].}
+\item{x}{A `hmtp` object produced by a call to [hmtp::hmtp_tmle()].}
 
 \item{...}{Unused, included for generic consistency only.}
 }

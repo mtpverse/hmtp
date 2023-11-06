@@ -22,6 +22,7 @@ theta <- function(y, r, q, m, boots, id = NULL, weights, shift, fits_r, fits_q, 
 		density_ratios = r,
 		zero_reg = q$shifted,
 		positive_reg = m$shifted,
+		boots = boots,
 		fits_r = fits_r,
 		fits_q = fits_q,
 		fits_m = fits_m
