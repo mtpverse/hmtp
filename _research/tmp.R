@@ -1,4 +1,4 @@
-library(hmtp)
+# library(hmtp)
 library(mlr3extralearners)
 library(lmtp)
 library(future)
@@ -46,13 +46,12 @@ gendata <- function(n, betap) {
 # summary(gendata(1e7, -3)$pi)
 truth <- 11.2
 
-learners <- list("glm", "earth", "lightgbm", "ranger", list("nnet", trace = FALSE))
+learners <- list("glm", "earth", "ranger")
 
-set.seed(534)
-dat <- gendata(500, -3)
+dat <- gendata(1e4, 0)
 
 htmle <- hmtp_tmle(dat, "A", "Y", paste0("z", 1:4),
-									 shift = static_binary_on, folds = 10,
+									 shift = static_binary_on, folds = 1,
 									 learners_trt = learners,
 									 learners_zero = learners,
 									 learners_positive = learners)

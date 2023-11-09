@@ -1,13 +1,14 @@
-cf_r <- function(task, learners, mtp, control, pb) {
+cf_r <- function(task, pred_m, pred_q, learners, mtp, control, pb) {
   out <- list()
 
   for (fold in seq_along(task$folds)) {
     out[[fold]] <- future::future({
-      estimate_r(get_folded_data(task$natural, task$folds, fold),
-      					 get_folded_data(task$shifted, task$folds, fold),
+      estimate_r(get_folded_data(cbind("tmp_hmtp_pred_mq" = pred_m*pred_q, task$natural),
+      													 task$folds, fold),
+      					 get_folded_data(cbind("tmp_hmtp_pred_mq" = pred_m*pred_q, task$shifted),
+      					 								task$folds, fold),
       					 task$trt,
       					 task$cens,
-      					 task$node_list$trt,
       					 learners,
       					 pb,
       					 mtp,
@@ -19,7 +20,7 @@ cf_r <- function(task, learners, mtp, control, pb) {
   trim_ratios(recombine_ratios(future::value(out), task$folds), control$.trim)
 }
 
-estimate_r <- function(natural, shifted, trt, cens, node_list, learners, pb, mtp, control) {
+estimate_r <- function(natural, shifted, trt, cens, learners, pb, mtp, control) {
 	on.exit(pb())
   densratios <- matrix(nrow = nrow(natural$valid), ncol = 1)
 
@@ -28,7 +29,7 @@ estimate_r <- function(natural, shifted, trt, cens, node_list, learners, pb, mtp
   jv <- censored(natural$valid, cens)$j
   fv <- followed_rule(natural$valid[[trt]], shifted$valid[[trt]], mtp)
 
-  vars <- c(node_list[[1]], cens)
+	vars <- c("tmp_hmtp_pred_mq", trt, cens)
   stacked <- stack_data(natural$train, shifted$train)
 
   fit <- run_ensemble(stacked[jt, c("hmtp_id", vars, "tmp_hmtp_stack_indicator")],
