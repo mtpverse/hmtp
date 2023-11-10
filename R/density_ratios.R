@@ -14,7 +14,8 @@ cf_r <- function(task, pred_m, pred_q, learners, mtp, control, pb) {
       					 mtp,
       					 control)
     },
-    seed = TRUE)
+    seed = TRUE,
+    packages = "mlr3extralearners")
   }
 
   trim_ratios(recombine_ratios(future::value(out), task$folds), control$.trim)
