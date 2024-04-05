@@ -22,7 +22,6 @@ hmtp_task <- R6::R6Class(
       self$bounds <- y_bounds(data[[outcome]], upper_bound)
       data$hmtp_id <- create_ids(data, id)
       self$id <- id
-      self$folds <- setup_cv(data, data$hmtp_id, V)
       self$log <- log
 
       shifted <- {
@@ -48,6 +47,8 @@ hmtp_task <- R6::R6Class(
 
       data$tmp_hmtp_delta <- as.numeric(data[[outcome]] > 0)
       shifted$tmp_hmtp_delta <- data$tmp_hmtp_delta
+
+      self$folds <- setup_cv(data, V, data$hmtp_id, "tmp_hmtp_delta")
 
       self$natural <- data
       self$shifted <- shifted

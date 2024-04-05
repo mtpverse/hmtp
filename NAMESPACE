@@ -3,7 +3,6 @@
 S3method(print,hmtp)
 S3method(print,hmtp_contrast)
 S3method(tidy,hmtp)
-export(hmtp_contrast)
 export(hmtp_control)
 export(hmtp_tmle)
 export(static_binary_off)
