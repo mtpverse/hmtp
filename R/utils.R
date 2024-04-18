@@ -74,10 +74,17 @@ followed_rule <- function(obs_trt, shifted_trt, mtp) {
   mapply(function(x, y) isTRUE(all.equal(x, y)), as.list(obs_trt), as.list(shifted_trt))
 }
 
-recombine_ratios <- function(x, folds) {
+recombine_ratios <- function(x, folds, ipsi = FALSE) {
   ind <- Reduce(c, lapply(folds, function(x) x[["validation_set"]]))
 
   returns <- list()
+
+  if (ipsi) {
+  	returns$shifted <- Reduce(
+  		rbind,
+  		lapply(x, function(x) x$shifted)
+  	)[order(ind), ]
+  }
 
   returns$ratios <- Reduce(
     rbind,
@@ -93,6 +100,11 @@ recombine_ratios <- function(x, folds) {
   }
 
   returns$fits <- lapply(x, function(x) x[["fits"]])
+
+  if (ipsi) {
+  	returns$fits_cens <- lapply(x, function(x) x[["fits_cens"]])
+  }
+
   returns
 }
 

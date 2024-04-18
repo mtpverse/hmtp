@@ -13,7 +13,8 @@ hmtp_task <- R6::R6Class(
     folds = NULL,
     weights = NULL,
     log = NULL,
-    initialize = function(data, trt, outcome, baseline, cens, shift, shifted,
+    delta = NULL,
+    initialize = function(data, trt, outcome, baseline, cens, shift, shifted, delta,
     											id, V = 10, weights = NULL, log, upper_bound = NULL) {
       self$n <- nrow(data)
       self$trt <- trt
@@ -23,9 +24,12 @@ hmtp_task <- R6::R6Class(
       data$hmtp_id <- create_ids(data, id)
       self$id <- id
       self$log <- log
+      self$delta <- delta
 
       shifted <- {
-        if (is.null(shifted) && !is.null(shift))
+      	if (!is.null(delta))
+      		shift_data(data, trt, cens, NULL)
+        else if (is.null(shifted) && !is.null(shift))
           shift_data(data, trt, cens, shift)
         else if (is.null(shifted) && is.null(shift))
           shift_data(data, trt, cens, shift)

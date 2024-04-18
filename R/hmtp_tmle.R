@@ -19,6 +19,7 @@
 #' @param shifted \[\code{data.frame}\]\cr
 #'  An optional data frame, the same as in \code{data}, but modified according
 #'  to the treatment policy of interest. If specified, \code{shift} is ignored.
+#' @param delta \[\code{numeric(1)}\]\cr
 #' @param mtp \[\code{logical(1)}\]\cr
 #'  Is the intervention of interest a modified treatment policy?
 #'  Default is \code{FALSE}. If treatment variables are continuous this should be \code{TRUE}.
@@ -46,6 +47,7 @@
 #' @export
 hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
                       cens = NULL, shift = NULL, shifted = NULL,
+											delta = NULL,
                       mtp = FALSE, id = NULL, upper_bound = NULL,
 											learners_trt = c("mean", "glm"),
 											learners_zero = c("mean", "glm"),
@@ -74,6 +76,7 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   											cens = cens,
   											shift = shift,
   											shifted = shifted,
+  											delta = delta,
   											id = id,
   											V = folds,
   											weights = weights,
@@ -83,6 +86,9 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   pb <- progressr::progressor(folds*3)
 
   r <- cf_r(task, learners_trt, mtp, control, pb)
+
+  if (!is.null(delta)) task$shifted <- r$shifted
+
   d <- cf_delta(task, learners_zero, control, pb)
   m <- cf_m(task, learners_positive, control, pb)
   eps <- cf_tmle(task, r$ratios, d, m, control)
