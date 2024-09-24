@@ -28,6 +28,7 @@
 #' @param learners_zero \[\code{character}\]\cr
 #' @param learners_positive \[\code{character}\]\cr
 #' @param learners_trt \[\code{character}\]\cr \bold{Only include candidate learners capable of binary classification}.
+#' @param boots \[\code{logical(1)}\]\cr
 #' @param folds \[\code{integer(1)}\]\cr
 #'  The number of folds to be used for cross-fitting.
 #' @param weights \[\code{numeric(nrow(data))}\]\cr
@@ -57,6 +58,7 @@ hmtp_tmle <- function(data,
 											learners_trt = "glm",
 											learners_zero = "glm",
 											learners_positive = "glm",
+											boot = TRUE,
 											folds = 10,
 											weights = NULL,
 											log = TRUE,
@@ -95,7 +97,7 @@ hmtp_tmle <- function(data,
   r <- cf_r(task, learners_trt, mtp, control, pb)
   d <- cf_delta(task, learners_zero, control, pb)
   m <- cf_m(task, learners_positive, control, pb)
-  eps <- cf_tmle(task, r$ratios, d, m, control)
+  eps <- cf_tmle(task, r$ratios, d, m, boot, control)
 
   theta(y = data[[outcome]],
   			r = r$ratios,

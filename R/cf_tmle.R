@@ -1,4 +1,4 @@
-cf_tmle <- function(task, ratios, delta, positive, control) {
+cf_tmle <- function(task, ratios, delta, positive, boot, control) {
   psi <- estimate_tmle(task$natural,
   										 ratios,
   										 delta[c("dn", "ds")],
@@ -6,6 +6,8 @@ cf_tmle <- function(task, ratios, delta, positive, control) {
   										 task$weights,
   										 task$cens,
   										 task$bounds)
+
+  if (isFALSE(boot)) return(list(psi = psi, booted = NULL))
 
   if (!is.null(control$.boot_seed)) set.seed(control$.boot_seed)
 
@@ -47,31 +49,47 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, bound
 			ratios[i, 1] * weights[i]
 	}
 
-	fit1 <- sw(
-		glm(
-			natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
-			family = "binomial",
-			weights = wts[d]
+	if (all(wts[d] == 0)) {
+		warning("All weights 0 in fluctuation, skipping TMLE update.")
+
+		ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1])), bounds)
+		mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1])), bounds)
+	} else {
+		fit1 <- sw(
+			glm(
+				natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
+				family = "binomial",
+				weights = wts[d]
+			)
 		)
-	)
 
-	eps1 <- coef(fit1)
+		eps1 <- coef(fit1)
 
-	ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
-	mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
+		ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
+		mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
+	}
 
 	wts2 <- wts*mn_eps[, 1]
 
-	fit2 <- sw(
-		glm(natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])),
+	if (all(wts2 == 0)) {
+		warning("All weights 0 in fluctuation, skipping TMLE update.")
+
+		ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]))
+		dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]))
+	} else {
+		fit2 <- sw(
+			glm(
+				natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])),
 				family = "binomial",
-				weights = wts2)
-	)
+				weights = wts2
+			)
+		)
 
-	eps2 <- coef(fit2)
+		eps2 <- coef(fit2)
 
-	ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1])
-	dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1])
+		ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1])
+		dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1])
+	}
 
 	list(qs = ds_eps,
 			 qn = dn_eps,

@@ -6,7 +6,14 @@ theta <- function(y, r, q, m, boots, id = NULL, weights, shift, fits_r, fits_q, 
 			weighted.mean(q$shifted*m$shifted, weights)
 	}
 
-	se <- sqrt(var(boots))
+	if (!is.null(boots)) {
+		se <- sqrt(var(boots))
+	} else {
+		inflnce <- eif(y, r, q$natural, q$shifted, m$natural, m$shifted)
+		clusters <- split(inflnce, 1:length(y))
+		j <- length(clusters)
+		se <- sqrt(var(vapply(clusters, function(x) mean(x), 1)) / j)
+	}
 
 	ci_low  <- theta - (qnorm(0.975) * se)
 	ci_high <- theta + (qnorm(0.975) * se)
@@ -30,4 +37,8 @@ theta <- function(y, r, q, m, boots, id = NULL, weights, shift, fits_r, fits_q, 
 
 	class(out) <- "hmtp"
 	out
+}
+
+eif <- function(y, r, qn, qs, mn, ms) {
+	r * (y - qn*mn) + qs*ms
 }
