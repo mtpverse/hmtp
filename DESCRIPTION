@@ -26,10 +26,8 @@ Imports:
     future,
     generics,
     progressr,
-    R6
+    R6, 
+    mlr3superlearner
 License: GPL (>= 3)
 Depends: 
-    mlr3superlearner (>= 0.1.0),
     R (>= 2.10)
-Remotes: 
-    nt-williams/mlr3superlearner
