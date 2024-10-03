@@ -28,7 +28,7 @@
 #' @param learners_zero \[\code{character}\]\cr
 #' @param learners_positive \[\code{character}\]\cr
 #' @param learners_trt \[\code{character}\]\cr \bold{Only include candidate learners capable of binary classification}.
-#' @param boots \[\code{logical(1)}\]\cr
+#' @param boot \[\code{logical(1)}\]\cr
 #' @param folds \[\code{integer(1)}\]\cr
 #'  The number of folds to be used for cross-fitting.
 #' @param weights \[\code{numeric(nrow(data))}\]\cr
@@ -103,7 +103,8 @@ hmtp_tmle <- function(data,
   			r = r$ratios,
   			q = list(natural = eps$psi$qn, shifted = eps$psi$qs),
   			m = list(natural = eps$psi$mn, shifted = eps$psi$ms),
-  			eps$booted,
+				aipw = FALSE,
+  			boots = eps$booted,
   			id = task$natural$hmtp_id,
   			weights = task$weights,
   			shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
