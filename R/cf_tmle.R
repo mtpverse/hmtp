@@ -5,6 +5,7 @@ cf_tmle <- function(task, ratios, delta, positive, boot, control) {
   										 positive[c("mn", "ms")],
   										 task$weights,
   										 task$cens,
+  										 control$.twostep,
   										 task$bounds)
 
   if (isFALSE(boot)) return(list(psi = psi, booted = NULL))
@@ -22,6 +23,7 @@ cf_tmle <- function(task, ratios, delta, positive, boot, control) {
   								lapply(positive[c("mn", "ms")], function(x) x[i, , drop = FALSE]),
   								task$weights[i, , drop = FALSE],
   								task$cens,
+  								control$.twostep,
   								task$bounds)
   })
 
@@ -35,7 +37,7 @@ cf_tmle <- function(task, ratios, delta, positive, boot, control) {
   list(psi = psi, booted = booted)
 }
 
-estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, bounds) {
+estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twostep, bounds) {
 	i  <- censored(natural, cens)$i
 	j <- censored(natural, cens)$j
 	d <- natural$tmp_hmtp_delta == 1
@@ -49,47 +51,79 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, bound
 			ratios[i, 1] * weights[i]
 	}
 
-	if (all(wts[d] == 0)) {
-		warning("All weights 0 in fluctuation, skipping TMLE update.")
+	if (twostep) {
+		if (all(wts[d] == 0)) {
+			warning("All weights 0 in fluctuation, skipping TMLE update.")
 
-		ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1])), bounds)
-		mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1])), bounds)
-	} else {
-		fit1 <- sw(
-			glm(
-				natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
-				family = "binomial",
-				weights = wts[d]
+			ms_eps[, 1] <- rescale_y(positive$ms[j, 1], bounds)
+			mn_eps[, 1] <- rescale_y(positive$mn[j, 1], bounds)
+		} else {
+			fit1 <- sw(
+				glm(
+					natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
+					family = "binomial",
+					weights = wts[d]
+				)
 			)
-		)
 
-		eps1 <- coef(fit1)
+			eps1 <- coef(fit1)
 
-		ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
-		mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
+			ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
+			mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
+		}
+
+		wts2 <- wts*mn_eps[, 1]
+
+		if (all(wts2 == 0)) {
+			warning("All weights 0 in fluctuation, skipping TMLE update.")
+
+			ds_eps[, 1] <- delta$ds[j, 1]
+			dn_eps[, 1] <- delta$dn[j, 1]
+		} else {
+			fit2 <- sw(
+				glm(
+					natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])),
+					family = "binomial",
+					weights = wts2
+				)
+			)
+
+			eps2 <- coef(fit2)
+
+			ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1])
+			dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1])
+		}
+
+		out <- list(qs = ds_eps,
+								qn = dn_eps,
+								ms = ms_eps,
+								mn = mn_eps)
+		return(out)
 	}
 
-	wts2 <- wts*mn_eps[, 1]
-
-	if (all(wts2 == 0)) {
+	if (all(wts == 0)) {
 		warning("All weights 0 in fluctuation, skipping TMLE update.")
 
-		ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]))
-		dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]))
-	} else {
-		fit2 <- sw(
-			glm(
-				natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])),
-				family = "binomial",
-				weights = wts2
-			)
-		)
-
-		eps2 <- coef(fit2)
-
-		ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1])
-		dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1])
+		ms_eps[, 1] <- rescale_y(positive$ms[j, 1]*delta$ds[j, 1], bounds)
+		mn_eps[, 1] <- rescale_y(positive$mn[j, 1]*delta$dn[j, 1], bounds)
+		ds_eps[, 1] <- 1
+		dn_eps[, 1] <- 1
 	}
+
+	fit <- sw(
+		glm(
+			natural[i, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i, 1]*delta$dn[i, 1])),
+			family = "binomial",
+			weights = wts
+		)
+	)
+
+	eps <- coef(fit)
+
+	ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]*delta$ds[j, 1]) + eps[1]), bounds)
+	mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]*delta$dn[j, 1]) + eps[1]), bounds)
+	ds_eps[, 1] <- 1
+	dn_eps[, 1] <- 1
 
 	list(qs = ds_eps,
 			 qn = dn_eps,
