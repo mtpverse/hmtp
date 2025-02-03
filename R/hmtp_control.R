@@ -8,7 +8,8 @@
 #' @examples
 hmtp_control <- function(...) {
 	change <- list(...)
-	control <- list(.learners_trt_folds = NULL,
+	control <- list(.twostep = TRUE,
+									.learners_trt_folds = NULL,
 									.learners_delta_folds = NULL,
 									.learners_positive_folds = NULL,
 									.trim = 0.99,

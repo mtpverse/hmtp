@@ -67,4 +67,4 @@ hmtp_tmle(hmtp_simdata, "trt", "y", paste0("x.", 1:3), shift = static_binary_on)
 
 ## Citation
 
-## References
+Williams, N. T., Liu, R., Hoffman, K. L., Forrest, S., Rudolph, K. E., & Díaz, I. (2024). Two-step targeted minimum-loss based estimation for non-negative two-part outcomes. arXiv preprint arXiv:2401.04263.

@@ -19,5 +19,5 @@ A pre-packaged shift function for use with provided estimators when the exposure
 Used to estimate the population intervention effect when the treatment variable i set to 1.
 }
 \seealso{
-[hmtp_tmle()]
+\code{\link[=hmtp_tmle]{hmtp_tmle()}}
 }

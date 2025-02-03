@@ -1,4 +1,4 @@
-#' HMTP Targeted Maximum Likelihood Estimator
+#' hMTP Targeted Maximum Likelihood Estimator
 #'
 #' @param data \[\code{data.frame}\]\cr
 #'  A \code{data.frame} in wide format containing all necessary variables
@@ -28,6 +28,7 @@
 #' @param learners_zero \[\code{character}\]\cr
 #' @param learners_positive \[\code{character}\]\cr
 #' @param learners_trt \[\code{character}\]\cr \bold{Only include candidate learners capable of binary classification}.
+#' @param boot \[\code{logical(1)}\]\cr
 #' @param folds \[\code{integer(1)}\]\cr
 #'  The number of folds to be used for cross-fitting.
 #' @param weights \[\code{numeric(nrow(data))}\]\cr
@@ -47,13 +48,23 @@
 #'
 #' @example
 #' @export
-hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
-                      cens = NULL, shift = NULL, shifted = NULL,
-                      mtp = FALSE, id = NULL, upper_bound = NULL,
-											learners_trt = c("mean", "glm"),
-											learners_zero = c("mean", "glm"),
-                      learners_positive = c("mean", "glm"),
-                      folds = 10, weights = NULL, log = TRUE,
+hmtp_tmle <- function(data,
+											trt,
+											outcome,
+											baseline = NULL,
+											cens = NULL,
+											shift = NULL,
+											shifted = NULL,
+											mtp = FALSE,
+											id = NULL,
+											upper_bound = NULL,
+											learners_trt = "glm",
+											learners_zero = "glm",
+											learners_positive = "glm",
+											boot = TRUE,
+											folds = 10,
+											weights = NULL,
+											log = TRUE,
 											control = hmtp_control(),
 											r = NULL, m = NULL, q = NULL, ...) {
   assertNotDataTable(data)
@@ -90,13 +101,14 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   	r <- cf_r(task, learners_trt, mtp, control, pb)
   	d <- cf_delta(task, learners_zero, control, pb)
   	m <- cf_m(task, learners_positive, control, pb)
-  	eps <- cf_tmle(task, r$ratios, d, m, control)
+  	eps <- cf_tmle(task, r$ratios, d, m, boot, control)
 
   	out <- theta(y = data[[outcome]],
   							 r = r$ratios,
   							 q = list(natural = eps$psi$qn, shifted = eps$psi$qs),
   							 m = list(natural = eps$psi$mn, shifted = eps$psi$ms),
-  							 eps$booted,
+  							 aipw = FALSE,
+  							 boots = eps$booted,
   							 id = task$natural$hmtp_id,
   							 weights = task$weights,
   							 shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
@@ -104,19 +116,20 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   							 fits_q = d$fits,
   							 fits_m = m$fits)
   } else {
-  	eps <- cf_tmle(task, r, q, m, control)
+  	eps <- cf_tmle(task, r, q, m, boot, control)
 
   	out <- theta(y = data[[outcome]],
-  								 r = r,
-  								 q = list(natural = eps$psi$qn, shifted = eps$psi$qs),
-  								 m = list(natural = eps$psi$mn, shifted = eps$psi$ms),
-  								 boots = eps$booted,
-  								 id = task$natural$hmtp_id,
-  								 weights = task$weights,
-  								 shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
-  								 fits_r = NULL,
-  								 fits_q = NULL,
-  								 fits_m = NULL)
+  							 r = r,
+  							 q = list(natural = eps$psi$qn, shifted = eps$psi$qs),
+  							 m = list(natural = eps$psi$mn, shifted = eps$psi$ms),
+  							 aipw = FALSE,
+  							 boots = eps$booted,
+  							 id = task$natural$hmtp_id,
+  							 weights = task$weights,
+  							 shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
+  							 fits_r = NULL,
+  							 fits_q = NULL,
+  							 fits_m = NULL)
   }
 
   return(out)

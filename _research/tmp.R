@@ -47,12 +47,19 @@ gendata <- function(n, betap) {
 truth <- 11.2
 
 learners <- list("glm", "earth", "lightgbm", "ranger", list("nnet", trace = FALSE))
+learners = "glm"
 
 set.seed(534)
-dat <- gendata(500, -3)
+dat <- gendata(1e4, -3)
 
 htmle <- hmtp_tmle(dat, "A", "Y", paste0("z", 1:4),
-									 shift = static_binary_on, folds = 10,
+									 shift = static_binary_on, folds = 1,
+									 learners_trt = learners,
+									 learners_zero = learners,
+									 learners_positive = learners, 
+									boot = FALSE)
+hmtp_aipw(dat, "A", "Y", paste0("z", 1:4),
+									 shift = static_binary_on, folds = 1,
 									 learners_trt = learners,
 									 learners_zero = learners,
 									 learners_positive = learners)
