@@ -34,6 +34,9 @@
 #'  An optional vector containing sampling weights.
 #' @param log
 #' @param control
+#' @param r \[\code{matrix(N,1)}\]\cr
+#' @param m \[\code{matrix(N,2)}\]\cr
+#' @param q \[\code{matrix(N,2)}\]\cr
 #' @param ... Extra arguments. Exists for backwards compatibility.
 #'
 #' @details
@@ -51,7 +54,8 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
 											learners_zero = c("mean", "glm"),
                       learners_positive = c("mean", "glm"),
                       folds = 10, weights = NULL, log = TRUE,
-											control = hmtp_control(), ...) {
+											control = hmtp_control(),
+											r = NULL, m = NULL, q = NULL, ...) {
   assertNotDataTable(data)
 	checkmate::assertNumeric(data[[outcome]], lower = 0)
   checkmate::assertCharacter(baseline, null.ok = TRUE)
@@ -80,22 +84,40 @@ hmtp_tmle <- function(data, trt, outcome, baseline = NULL,
   											log = log,
   											upper_bound = upper_bound)
 
-  pb <- progressr::progressor(folds*3)
+  if (is.null(r) && is.null(m) && is.null(q)) {
+  	pb <- progressr::progressor(folds*3)
 
-  r <- cf_r(task, learners_trt, mtp, control, pb)
-  d <- cf_delta(task, learners_zero, control, pb)
-  m <- cf_m(task, learners_positive, control, pb)
-  eps <- cf_tmle(task, r$ratios, d, m, control)
+  	r <- cf_r(task, learners_trt, mtp, control, pb)
+  	d <- cf_delta(task, learners_zero, control, pb)
+  	m <- cf_m(task, learners_positive, control, pb)
+  	eps <- cf_tmle(task, r$ratios, d, m, control)
 
-  theta(y = data[[outcome]],
-  			r = r$ratios,
-  			q = list(natural = eps$psi$qn, shifted = eps$psi$qs),
-  			m = list(natural = eps$psi$mn, shifted = eps$psi$ms),
-  			eps$booted,
-  			id = task$natural$hmtp_id,
-  			weights = task$weights,
-  			shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
-  			fits_r = r$fits,
-  			fits_q = d$fits,
-  			fits_m = m$fits)
+  	out <- theta(y = data[[outcome]],
+  							 r = r$ratios,
+  							 q = list(natural = eps$psi$qn, shifted = eps$psi$qs),
+  							 m = list(natural = eps$psi$mn, shifted = eps$psi$ms),
+  							 eps$booted,
+  							 id = task$natural$hmtp_id,
+  							 weights = task$weights,
+  							 shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
+  							 fits_r = r$fits,
+  							 fits_q = d$fits,
+  							 fits_m = m$fits)
+  } else {
+  	eps <- cf_tmle(task, r, q, m, control)
+
+  	out <- theta(y = data[[outcome]],
+  								 r = r,
+  								 q = list(natural = eps$psi$qn, shifted = eps$psi$qs),
+  								 m = list(natural = eps$psi$mn, shifted = eps$psi$ms),
+  								 boots = eps$booted,
+  								 id = task$natural$hmtp_id,
+  								 weights = task$weights,
+  								 shift = if (is.null(shifted)) deparse(substitute((shift))) else NULL,
+  								 fits_r = NULL,
+  								 fits_q = NULL,
+  								 fits_m = NULL)
+  }
+
+  return(out)
 }

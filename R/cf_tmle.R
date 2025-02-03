@@ -60,18 +60,20 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, bound
 	ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
 	mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
 
+	# wts2 <- wts*(plogis(qlogis(positive$mn[j, 1]) + eps1[1]))
 	wts2 <- wts*mn_eps[, 1]
 
 	fit2 <- sw(
-		glm(natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])),
-				family = "binomial",
-				weights = wts2)
+		glm(natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])) + wts2[i],
+				family = "binomial")
+		# ,
+		# 		weights = wts2)
 	)
 
 	eps2 <- coef(fit2)
 
-	ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1])
-	dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1])
+	ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1] + wts2[j]*eps2[2])
+	dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1] + wts2[j]*eps2[2])
 
 	list(qs = ds_eps,
 			 qn = dn_eps,

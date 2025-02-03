@@ -1,4 +1,4 @@
-theta <- function(y, r, q, m, boots, id = NULL, weights, shift, fits_r, fits_q, fits_m) {
+theta <- function(y, r = NULL, q, m, boots, id = NULL, weights, shift, fits_r, fits_q, fits_m) {
 	theta <- {
 		if (is.null(weights))
 			mean(q$shifted*m$shifted)

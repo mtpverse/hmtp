@@ -13,7 +13,8 @@ cf_m <- function(task, learners, control, pb) {
 								 pb,
 								 control)
 		},
-		seed = TRUE)
+		seed = TRUE,
+		packages = "mlr3extralearners")
 	}
 
 	out <- future::value(out)
