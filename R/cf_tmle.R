@@ -82,16 +82,17 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twost
 		} else {
 			fit2 <- sw(
 				glm(
-					natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])),
-					family = "binomial",
-					weights = wts2
+					natural[i, ]$tmp_hmtp_delta ~ offset(qlogis(delta$dn[i, 1])) + wts2[i],
+					family = "binomial"
+					# ,
+					# weights = wts2
 				)
 			)
 
 			eps2 <- coef(fit2)
 
-			ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1])
-			dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1])
+			ds_eps[, 1] <- plogis(qlogis(delta$ds[j, 1]) + eps2[1] + wts2[j]*eps2[2])
+			dn_eps[, 1] <- plogis(qlogis(delta$dn[j, 1]) + eps2[1] + wts2[j]*eps2[2])
 		}
 
 		out <- list(qs = ds_eps,
