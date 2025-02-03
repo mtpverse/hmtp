@@ -60,16 +60,17 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twost
 		} else {
 			fit1 <- sw(
 				glm(
-					natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
-					family = "binomial",
-					weights = wts[d]
+					natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])) + wts[i & d],
+					family = "binomial"
+					# ,
+					# weights = wts[d]
 				)
 			)
 
 			eps1 <- coef(fit1)
 
-			ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
-			mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
+			ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1] + wts[j]*eps1[2]), bounds)
+			mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1] + wts[j]*eps1[2]), bounds)
 		}
 
 		wts2 <- wts*mn_eps[, 1]
@@ -113,16 +114,17 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twost
 
 	fit <- sw(
 		glm(
-			natural[i, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i, 1]*delta$dn[i, 1])),
-			family = "binomial",
-			weights = wts
+			natural[i, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i, 1]*delta$dn[i, 1])) + wts[i],
+			family = "binomial"
+			# ,
+			# weights = wts
 		)
 	)
 
 	eps <- coef(fit)
 
-	ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]*delta$ds[j, 1]) + eps[1]), bounds)
-	mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]*delta$dn[j, 1]) + eps[1]), bounds)
+	ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]*delta$ds[j, 1]) + eps[1] + wts[j]*eps[2]), bounds)
+	mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]*delta$dn[j, 1]) + eps[1] + wts[j]*eps[2]), bounds)
 	ds_eps[, 1] <- 1
 	dn_eps[, 1] <- 1
 
