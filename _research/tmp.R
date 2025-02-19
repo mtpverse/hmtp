@@ -47,17 +47,18 @@ gendata <- function(n, betap) {
 truth <- 11.2
 
 learners <- list("glm", "earth", "lightgbm", "ranger", list("nnet", trace = FALSE))
-learners = "glm"
+learners = c("glm", "earth")
 
 set.seed(534)
-dat <- gendata(1e4, -3)
+dat <- gendata(1e3, 0)
 
 htmle <- hmtp_tmle(dat, "A", "Y", paste0("z", 1:4),
 									 shift = static_binary_on, folds = 1,
 									 learners_trt = learners,
 									 learners_zero = learners,
-									 learners_positive = learners, 
+									 learners_positive = learners,
 									boot = FALSE)
+
 hmtp_aipw(dat, "A", "Y", paste0("z", 1:4),
 									 shift = static_binary_on, folds = 1,
 									 learners_trt = learners,
@@ -65,10 +66,10 @@ hmtp_aipw(dat, "A", "Y", paste0("z", 1:4),
 									 learners_positive = learners)
 
 aipw <- lmtp_sdr(dat, "A", "Y", paste0("z", 1:4), shift = static_binary_on,
-								 folds = 10, outcome_type = "continuous",
+								 folds = 1, outcome_type = "continuous",
 								 learners_trt = learners, learners_outcome = learners)
 
 tmle <- lmtp_tmle(dat, "A", "Y", paste0("z", 1:4), shift = static_binary_on,
-				 folds = 10, outcome_type = "continuous",
+				 folds = 1, outcome_type = "continuous",
 				 learners_trt = learners, learners_outcome = learners)
 

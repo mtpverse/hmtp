@@ -5,6 +5,7 @@ run_ensemble <- function(data, y, learners, outcome_type, id, folds) {
 		library = learners,
 		outcome_type = outcome_type,
 		folds = folds,
-		group = id
+		group = id,
+		discrete = FALSE
 	)
 }
