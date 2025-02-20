@@ -111,7 +111,7 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twost
 
 	fit <- sw(
 		glm(
-			natural[i, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i, 1]*delta$dn[i, 1])) + wts[i],
+			natural[i, ]$tmp_hmtp_ystar ~ -1 + offset(qlogis(positive$mn[i, 1]*delta$dn[i, 1])) + wts[i],
 			family = "binomial"
 		)
 	)
