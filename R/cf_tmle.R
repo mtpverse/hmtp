@@ -56,7 +56,7 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twost
 			warning("All weights 0 in fluctuation, skipping TMLE update.")
 
 			ms_eps[, 1] <- rescale_y(positive$ms[j, 1], bounds)
-			mn_eps[, 1] <- rescale_y(positive$mn[j, 1], bounds)
+			mn_eps[, 1] <- positive$mn[j, 1]
 		} else {
 			# fit1 <- sw(
 			# 	glm(
@@ -69,7 +69,7 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twost
 			#
 			# ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]*wts[j]), bounds)
 			# mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]*wts[j]), bounds)
-browser()
+
 			fit1 <- sw(
 				glm(
 					natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
@@ -81,10 +81,11 @@ browser()
 			eps1 <- coef(fit1)
 
 			ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]), bounds)
-			mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]), bounds)
+			mn_eps[, 1] <- plogis(qlogis(positive$mn[j, 1]) + eps1[1])
 		}
 
 		wts2 <- wts*mn_eps[, 1]
+		mn_eps <- rescale_y(mn_eps[, 1], bounds)
 
 		if (all(wts2 == 0)) {
 			warning("All weights 0 in fluctuation, skipping TMLE update.")
