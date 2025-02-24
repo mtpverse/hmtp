@@ -9,7 +9,7 @@ theta <- function(y, r, q, m, aipw = FALSE, boots, id = NULL, weights, shift, fi
 		j <- length(clusters)
 		se <- sqrt(var(vapply(clusters, function(x) mean(x), 1)) / j)
 	}
-	
+
 	if (isFALSE(aipw)) {
 		theta <- weighted.mean(q$shifted*m$shifted, weights)
 	} else {
