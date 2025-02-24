@@ -69,7 +69,7 @@ estimate_tmle <- function(natural, ratios, delta, positive, weights, cens, twost
 			#
 			# ms_eps[, 1] <- rescale_y(plogis(qlogis(positive$ms[j, 1]) + eps1[1]*wts[j]), bounds)
 			# mn_eps[, 1] <- rescale_y(plogis(qlogis(positive$mn[j, 1]) + eps1[1]*wts[j]), bounds)
-
+browser()
 			fit1 <- sw(
 				glm(
 					natural[i & d, ]$tmp_hmtp_ystar ~ offset(qlogis(positive$mn[i & d, 1])),
